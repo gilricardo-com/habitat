@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    entrypoint: ["/app/entrypoint.sh"]
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./team:/app/backend/static/uploads/team  # Mount host ./team to backend container
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    # image: "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/habitat-frontend:latest"
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  proxy:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro  # Place ACM certs here or mount via volume
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - ./.env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  db_data: {}
