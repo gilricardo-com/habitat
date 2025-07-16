@@ -129,3 +129,14 @@ venv/
 
 # mirror repo created while cleaning history
 habitat.git.bfg-temp/ 
+.env
+.env
+docker-compose.yml
+.env
+docker-compose.yml
+frontend/.env.local
+docker-compose.yml
+.env
+.env
+.env.example
+docker-compose.yml
